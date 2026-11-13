@@ -1,0 +1,9 @@
+[tool.ruff] # provjerava sti l i očite pogreškw
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I"] #E, W su pravila stila, F su pogreške poput neiskorištenog importa, I je redosljed importa
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]

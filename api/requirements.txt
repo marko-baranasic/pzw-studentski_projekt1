@@ -1,0 +1,20 @@
+# Aplikacija
+fastapi
+uvicorn[standard]
+pydantic-settings
+
+# Baza
+sqlalchemy[asyncio]
+asyncpg
+alembic
+
+# Autentikacija
+bcrypt
+pyjwt
+
+# Razvoj i testovi
+ruff
+pytest
+pytest-asyncio
+httpx
+freezegun
