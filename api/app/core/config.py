@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     env: str = "dev"
     database_url: str # nemaju zadanu vrijednost
     jwt_secret: str # nemaju zadanu vrijednost
-    # ako ih nema u .env, aplikacija se neće ni pokrenuti, 
+    # ako ih nema u .env, aplikacija se neće ni pokrenuti,
     # što je bolje nego da adne na prvom zahtjevu
 
 
