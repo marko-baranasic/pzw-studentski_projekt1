@@ -91,7 +91,8 @@ async def get_or_create_boat(
 
 async def seed() -> None:
     # Jedna transakcija: ili su svi retci upisani, ili nijedan
-    async with AsyncSessionLocal() as session, session.begin(): # ako bilo koji korak baci grešku, cijeli unos se poništava
+    # Ako bilo koji korak baci grešku, cijeli se unos poništava.
+    async with AsyncSessionLocal() as session, session.begin():
         for user in DEMO_USERS:
             await get_or_create_user(session, *user)
 
