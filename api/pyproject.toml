@@ -7,3 +7,9 @@ select = ["E", "W", "F", "I"] #E, W su pravila stila, F su pogreške poput neisk
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
+
+
+[tool.ruff.lint.per-file-ignores]
+# Alembic generira ove datoteke; ne uređujemo ih ručno
+"migrations/env.py" = ["E402"]
+"migrations/versions/*" = ["E501"]
