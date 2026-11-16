@@ -60,3 +60,17 @@ async def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)] #kratki nadimak
+
+
+
+
+def require_role(*roles: str):
+    async def checker(user: CurrentUser) -> User:
+        if user.role not in roles:
+            raise AppError("forbidden", "Nemate ovlasti za ovu radnju", 403)
+        return user
+
+    return checker
+
+
+AdminUser = Annotated[User, Depends(require_role("admin"))]
