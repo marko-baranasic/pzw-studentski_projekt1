@@ -13,3 +13,10 @@ known-first-party = ["app"]
 # Alembic generira ove datoteke; ne uređujemo ih ručno
 "migrations/env.py" = ["E402"]
 "migrations/versions/*" = ["E501"]
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+testpaths = ["tests"]
