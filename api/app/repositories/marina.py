@@ -15,3 +15,15 @@ async def create(session: AsyncSession, marina: Marina) -> Marina:
     await session.commit()
     await session.refresh(marina)
     return marina
+
+
+
+
+async def get_by_id(session: AsyncSession, marina_id: int) -> Marina | None:
+    return await session.get(Marina, marina_id)
+
+
+async def save(session: AsyncSession, marina: Marina) -> Marina:
+    await session.commit()
+    await session.refresh(marina)
+    return marina
