@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.core.errors import register_error_handlers
-from app.routers import auth, health, marinas
+from app.routers import auth, boats, health, marinas
 
 
 def create_app() -> FastAPI:
@@ -11,6 +11,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(marinas.router)
+    app.include_router(boats.router)
     return app
 
 
