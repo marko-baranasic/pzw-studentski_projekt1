@@ -23,6 +23,11 @@ async def create_reservation(
         raise AppError(
             "capacity_exceeded", f"Brod prima najviše {boat.capacity} osoba", 400
         )
+    # Najam ne smije početi u prošlosti (datum po UTC-u, kao i rok za otkaz)
+    if data.start_date < datetime.now(timezone.utc).date():
+        raise AppError(
+            "start_in_past", "Rezervacija ne može početi u prošlosti", 400
+        )
 
     days = (data.end_date - data.start_date).days
     reservation = Reservation(

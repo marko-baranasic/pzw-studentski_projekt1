@@ -347,3 +347,35 @@ async def test_admin_can_cancel_after_deadline(client, session):
 
     assert response.status_code == 200
     assert response.json()["status"] == "cancelled"
+
+
+# --- Početak u prošlosti (zamrznuto vrijeme) ---
+
+
+async def test_reservation_starting_today_is_allowed(client, session):
+    ana = await make_user(session, "ana@test.hr")
+    boat = await make_boat(session)
+
+    with freeze_time("2027-07-01 23:00:00"):
+        response = await client.post(
+            "/reservations",
+            json=booking(boat.id, "2027-07-01", "2027-07-05"),
+            headers=auth_header(ana),
+        )
+
+    assert response.status_code == 201
+
+
+async def test_reservation_in_the_past_is_400(client, session):
+    ana = await make_user(session, "ana@test.hr")
+    boat = await make_boat(session)
+
+    with freeze_time("2027-07-02 00:01:00"):
+        response = await client.post(
+            "/reservations",
+            json=booking(boat.id, "2027-07-01", "2027-07-05"),
+            headers=auth_header(ana),
+        )
+
+    assert response.status_code == 400
+    assert response.json()["code"] == "start_in_past"
