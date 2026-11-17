@@ -1,3 +1,5 @@
+from datetime import datetime, time, timedelta, timezone
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,6 +8,9 @@ from app.models import Reservation, User
 from app.repositories import reservation as reservation_repo
 from app.schemas.reservation import ReservationCreate
 from app.services import boat as boat_service
+
+# Klijent smije otkazati najkasnije 48 sati prije početka najma
+CANCEL_DEADLINE = timedelta(hours=48)
 
 
 async def create_reservation(
@@ -57,3 +62,40 @@ async def get_reservation(
     if user.role != "admin" and reservation.user_id != user.id:
         raise AppError("forbidden", "Ovo nije vaša rezervacija", 403)
     return reservation
+
+
+def rental_start(reservation: Reservation) -> datetime:
+    # Najam počinje u ponoć (UTC) na dan start_date
+    return datetime.combine(reservation.start_date, time.min, tzinfo=timezone.utc)
+
+
+async def confirm_reservation(
+    session: AsyncSession, user: User, reservation_id: int
+) -> Reservation:
+    reservation = await get_reservation(session, user, reservation_id)
+    if reservation.status != "pending":
+        raise AppError(
+            "invalid_status", "Potvrditi se može samo rezervacija na čekanju", 400
+        )
+    reservation.status = "confirmed"
+    return await reservation_repo.save(session, reservation)
+
+
+async def cancel_reservation(
+    session: AsyncSession, user: User, reservation_id: int
+) -> Reservation:
+    # get_reservation provjerava i vlasništvo: tuđu rezervaciju ne može otkazati
+    reservation = await get_reservation(session, user, reservation_id)
+    if reservation.status == "cancelled":
+        raise AppError("invalid_status", "Rezervacija je već otkazana", 400)
+    # Rok vrijedi za klijenta; admin smije otkazati uvijek
+    if user.role != "admin":
+        deadline = rental_start(reservation) - CANCEL_DEADLINE
+        if datetime.now(timezone.utc) > deadline:
+            raise AppError(
+                "cancellation_deadline_passed",
+                "Rezervacija se može otkazati najkasnije 48 sati prije početka",
+                400,
+            )
+    reservation.status = "cancelled"
+    return await reservation_repo.save(session, reservation)

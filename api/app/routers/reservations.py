@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from app.core.deps import CurrentUser, CustomerUser, SessionDep
+from app.core.deps import AdminUser, CurrentUser, CustomerUser, SessionDep
 from app.models import Reservation
 from app.schemas.reservation import (
     ReservationCreate,
@@ -39,3 +39,19 @@ async def get_reservation(
     reservation_id: int, session: SessionDep, user: CurrentUser
 ) -> Reservation:
     return await reservation_service.get_reservation(session, user, reservation_id)
+
+
+@router.post("/{reservation_id}/confirm", response_model=ReservationResponse)
+async def confirm_reservation(
+    reservation_id: int, session: SessionDep, admin: AdminUser
+) -> Reservation:
+    return await reservation_service.confirm_reservation(
+        session, admin, reservation_id
+    )
+
+
+@router.post("/{reservation_id}/cancel", response_model=ReservationResponse)
+async def cancel_reservation(
+    reservation_id: int, session: SessionDep, user: CurrentUser
+) -> Reservation:
+    return await reservation_service.cancel_reservation(session, user, reservation_id)
