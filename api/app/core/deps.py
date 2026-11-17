@@ -74,3 +74,6 @@ def require_role(*roles: str):
 
 
 AdminUser = Annotated[User, Depends(require_role("admin"))]
+
+
+CustomerUser = Annotated[User, Depends(require_role("customer"))]
