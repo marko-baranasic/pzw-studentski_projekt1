@@ -79,8 +79,10 @@ Sve promjene sheme idu kroz Alembic migracije u `api/migrations/`.
   ponoć UTC na dan `start_date`). Admin smije otkazati uvijek.
 - Potvrditi se može samo rezervacija `pending`; otkazana se ne može ni potvrditi
   ni ponovno otkazati.
+- Rezervacija ne može početi u prošlosti (datum po UTC-u).
 - Broj osoba ne smije prijeći kapacitet broda, a brod koji nije u ponudi ne može
-  se rezervirati.
+  se rezervirati. Admin povlači brod iz ponude s `PATCH /boats/{id}` i
+  `{"is_active": false}`; postojeće rezervacije ostaju.
 - Cijena se računa pri stvaranju (broj dana × cijena po danu) i zapisuje u
   rezervaciju, pa je kasnija promjena cijene broda ne mijenja.
 
@@ -101,6 +103,7 @@ Popisi primaju `limit` (1–100, zadano 20) i `offset`.
 | GET | `/boats` | javno, filtri `type` i `marina_id` |
 | POST | `/boats` | admin |
 | GET | `/boats/{id}` | javno |
+| PATCH | `/boats/{id}` | admin |
 | GET | `/reservations` | admin: sve, customer: samo svoje; filtar `status` |
 | POST | `/reservations` | customer |
 | GET | `/reservations/{id}` | vlasnik ili admin |
@@ -122,5 +125,6 @@ Svaki neuspjeh vraća tijelo istoga oblika: `{"code": "...", "message": "..."}`.
 | `boat_unavailable` | 409 | brod je u tom razdoblju već rezerviran |
 | `capacity_exceeded` | 400 | više osoba nego što brod prima |
 | `boat_inactive` | 400 | brod nije u ponudi |
+| `start_in_past` | 400 | rezervacija bi počela u prošlosti |
 | `invalid_status` | 400 | radnja nije moguća u ovom statusu |
 | `cancellation_deadline_passed` | 400 | prošao je rok za otkaz |
