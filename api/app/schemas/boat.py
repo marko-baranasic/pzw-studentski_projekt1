@@ -14,6 +14,19 @@ class BoatCreate(BaseModel):
     price_per_day: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
 
 
+class BoatUpdate(BaseModel):
+    # Sva polja su neobavezna: PATCH mijenja samo ono što je poslano
+    marina_id: int | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    type: BoatType | None = None
+    capacity: int | None = Field(default=None, gt=0)
+    price_per_day: Decimal | None = Field(
+        default=None, gt=0, max_digits=10, decimal_places=2
+    )
+    # False povlači brod iz ponude; postojeće rezervacije ostaju
+    is_active: bool | None = None
+
+
 class BoatResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

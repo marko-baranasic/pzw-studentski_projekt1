@@ -30,3 +30,9 @@ async def create(session: AsyncSession, boat: Boat) -> Boat:
     await session.commit()
     await session.refresh(boat)
     return boat
+
+
+async def save(session: AsyncSession, boat: Boat) -> Boat:
+    await session.commit()
+    await session.refresh(boat)
+    return boat

@@ -120,3 +120,55 @@ async def test_boat_with_zero_capacity_is_422(client, session):
 
     assert response.status_code == 422
     assert response.json()["code"] == "validation_error"
+
+
+async def test_patch_boat_changes_only_sent_fields(client, session):
+    zadar, _ = await make_fleet(session)
+    admin = await make_user(session, "admin@test.hr", role="admin")
+    boats = await client.get("/boats", params={"marina_id": zadar.id})
+    boat_id = boats.json()[0]["id"]
+
+    response = await client.patch(
+        f"/boats/{boat_id}",
+        json={"price_per_day": "200.00"},
+        headers=auth_header(admin),
+    )
+
+    assert response.status_code == 200
+    assert response.json()["price_per_day"] == "200.00"
+    assert response.json()["name"] == "Jadranka"
+
+
+async def test_customer_cannot_update_boat(client, session):
+    await make_fleet(session)
+    customer = await make_user(session, "ana@test.hr")
+
+    response = await client.patch(
+        "/boats/1", json={"is_active": False}, headers=auth_header(customer)
+    )
+
+    assert response.status_code == 403
+    assert response.json()["code"] == "forbidden"
+
+
+async def test_deactivated_boat_cannot_be_booked(client, session):
+    await make_fleet(session)
+    admin = await make_user(session, "admin@test.hr", role="admin")
+    customer = await make_user(session, "ana@test.hr")
+    await client.patch(
+        "/boats/1", json={"is_active": False}, headers=auth_header(admin)
+    )
+
+    response = await client.post(
+        "/reservations",
+        json={
+            "boat_id": 1,
+            "start_date": "2027-07-01",
+            "end_date": "2027-07-05",
+            "guests": 2,
+        },
+        headers=auth_header(customer),
+    )
+
+    assert response.status_code == 400
+    assert response.json()["code"] == "boat_inactive"

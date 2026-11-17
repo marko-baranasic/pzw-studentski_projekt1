@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 
 from app.core.deps import AdminUser, SessionDep
 from app.models import Boat
-from app.schemas.boat import BoatCreate, BoatResponse, BoatType
+from app.schemas.boat import BoatCreate, BoatResponse, BoatType, BoatUpdate
 from app.services import boat as boat_service
 
 router = APIRouter(prefix="/boats", tags=["boats"])
@@ -29,3 +29,10 @@ async def create_boat(data: BoatCreate, session: SessionDep, admin: AdminUser) -
 @router.get("/{boat_id}", response_model=BoatResponse)
 async def get_boat(boat_id: int, session: SessionDep) -> Boat:
     return await boat_service.get_boat(session, boat_id)
+
+
+@router.patch("/{boat_id}", response_model=BoatResponse)
+async def update_boat(
+    boat_id: int, data: BoatUpdate, session: SessionDep, admin: AdminUser
+) -> Boat:
+    return await boat_service.update_boat(session, boat_id, data)
