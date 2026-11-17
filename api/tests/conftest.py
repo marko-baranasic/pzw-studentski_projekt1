@@ -37,10 +37,12 @@ async def prepare_database() -> None:
     await admin.dispose()
 
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        # btree_gist treba za pravilo preklapanja u tablici reservations
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS btree_gist"))
         # Briše sve tablice koje su ostale od prošlog pokretanja testova
+        await conn.run_sync(Base.metadata.drop_all)
+        # Ponovno stvara sve tablice (users, marinas, boats, reservations)
         await conn.run_sync(Base.metadata.create_all)
-        # Ponovno stvara sve tablice (users, marinas, boats...)
 
 
 @pytest.fixture(scope="session", autouse=True)
